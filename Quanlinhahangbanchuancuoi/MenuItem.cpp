@@ -1,0 +1,54 @@
+﻿#include "MenuItem.h"
+#include <iostream>
+using namespace std;
+
+MenuItem::MenuItem()
+    : id(0), name(""), price(0.0), category(""), stock(0) {
+}
+
+MenuItem::MenuItem(int _id, 
+    const string& _name,
+    double _price,
+    const string& _category,
+    int _stock)
+    : id(_id), name(_name), price(_price),
+    category(_category), stock(_stock) {
+}
+
+MenuItem::~MenuItem() {}
+
+int MenuItem::getID() const { return id; }
+string MenuItem::getName() const { return name; }
+double MenuItem::getPrice() const { return price; }
+string MenuItem::getCategory() const { return category; }
+int MenuItem::getStock() const { return stock; }
+
+void MenuItem::setName(const string& _name) { name = _name; }
+
+void MenuItem::setPrice(double _price) {
+    if (_price >= 0) price = _price;
+}
+
+void MenuItem::setCategory(const string& _category) {
+    category = _category;
+}
+
+void MenuItem::setStock(int _stock) {
+    if (_stock < 0) _stock = 0;
+    stock = _stock;
+}
+
+bool MenuItem::isAvailable() const {
+    return stock > 0;
+}
+
+void MenuItem::reduceStock(int quantity) {
+    if (quantity <= 0) return;
+    stock -= quantity;
+    if (stock < 0) stock = 0;
+}
+
+void MenuItem::restock(int quantity) {
+    if (quantity <= 0) return;
+    stock += quantity;
+}
