@@ -37,6 +37,11 @@ void menuShowMenu(Restaurant& res) {
     res.showMenu();
 }
 
+// Xem tồn kho menu
+void menuShowMenuStock(Restaurant& res) {
+    res.showMenuStock();
+}
+
 // Them mon moi vao menu
 void menuAddMenuItem(Restaurant& res) {
     int typeChoice;
@@ -71,8 +76,6 @@ void menuAddMenuItem(Restaurant& res) {
     if (typeChoice == 1) { // Mon an
         string dishType;
         int servingSize;
-        char vegChar;
-        bool isVegetarian;
 
         cout << "Nhap loai mon (khai vi/chinh/trang mieng/...): ";
         getline(cin, dishType);
@@ -80,27 +83,20 @@ void menuAddMenuItem(Restaurant& res) {
         cout << "Nhap khoi luong phuc vu (gram): ";
         cin >> servingSize;
 
-        cout << "Co phai mon chay khong? (y/n): ";
-        cin >> vegChar;
-        clearInput();
-        isVegetarian = (vegChar == 'y' || vegChar == 'Y');
-
         // Tao mon an moi
         item = new Food(id, name, price, stock,
             dishType, servingSize);
     }
     else if (typeChoice == 2) { // Do uong
         string beverageType;
-        char alcoChar, hotChar;
-        bool isAlcoholic, isHot;
+        char alcoChar;
+        bool isAlcoholic;
 
         cout << "Nhap loai do uong (nuoc ep/bia/...): ";
         getline(cin, beverageType);
 
         cout << "Co con khong? (y/n): ";
         cin >> alcoChar;
-
-      
 
         isAlcoholic = (alcoChar == 'y' || alcoChar == 'Y');
 
@@ -179,6 +175,25 @@ void menuFindMenuItem(Restaurant& res) {
     }
 }
 
+// ==== CHUC NANG BAN ==== //
+void menuAddTable(Restaurant& res) {
+    int id, capacity;
+    cout << "Nhap ID ban: ";
+    cin >> id;
+    cout << "Nhap suc chua: ";
+    cin >> capacity;
+    clearInput();
+
+    if (res.createTable(id, capacity))
+        cout << "Da them ban.\n";
+    else
+        cout << "Khong the them ban (da het cho/ID bi trung).\n";
+}
+
+void menuShowTables(Restaurant& res) {
+    res.showTables();
+}
+
 // ==== CHUC NANG KHACH HANG ==== //
 
 // Them khach hang moi
@@ -225,8 +240,6 @@ void menuCreateBill(Restaurant& res) {
         return;
     }
 
-
-
     Bill* bill = res.createBill(billID, c);
 
     if (!bill) {
@@ -235,9 +248,22 @@ void menuCreateBill(Restaurant& res) {
     }
 
     string dt;
-    cout << "Nhap ngay/giu (vd: 2025-12-28 19:30): ";
+    cout << "Nhap ngay/gio (vd: 2025-12-28 19:30): ";
     getline(cin, dt);
     bill->setDateTime(dt);
+
+    // Them ban vao hoa don
+    while (true) {
+        int tableID;
+        cout << "Nhap ID ban (0 de ket thuc): ";
+        cin >> tableID;
+        if (tableID == 0) { clearInput(); break; }
+
+        if (res.assignTableToBill(bill, tableID))
+            cout << "Da gan ban " << tableID << " cho hoa don (da dat).\n";
+        else
+            cout << "Khong the gan ban (ban khong ton tai hoac da duoc su dung).\n";
+    }
 
     // Them mon vao hoa don
     while (true) {
@@ -266,8 +292,33 @@ void menuCreateBill(Restaurant& res) {
             cout << "Da them mon.\n";
     }
 
-    res.finalizeBill(bill);
-    cout << "Da luu hoa don.\n";
+    // Hỏi có thanh toán ngay không
+    char payNow;
+    cout << "Ban co muon thanh toan ngay? (y/n): ";
+    cin >> payNow;
+    clearInput();
+    if (payNow == 'y' || payNow == 'Y') {
+        if (res.payBill(bill->getID()))
+            cout << "Da thanh toan va luu thong ke.\n";
+        else
+            cout << "Thanh toan that bai.\n";
+    }
+    else {
+        cout << "Hoa don duoc luu va cho thanh toan sau (ban da dat cac bàn).\n";
+    }
+}
+
+// Thanh toán hóa đơn (từ menu, theo ID)
+void menuPayBill(Restaurant& res) {
+    int id;
+    cout << "Nhap ID hoa don can thanh toan: ";
+    cin >> id;
+    clearInput();
+
+    if (res.payBill(id))
+        cout << "Thanh toan thanh cong.\n";
+    else
+        cout << "Khong the thanh toan (hoa don khong ton tai hoac da thanh toan).\n";
 }
 
 // Hien thi tat ca hoa don
@@ -304,8 +355,12 @@ void printMainMenu() {
     cout << "7. Them khach hang\n";
     cout << "8. Hien thi khach hang\n";
     cout << "9. Tao hoa don\n";
-    cout << "10. Hien thi tat ca hoa don\n";
+    cout << "10. Hien thi tat ca hoa don (CHUA THANH TOAN)\n";
     cout << "11. Thong ke doanh thu\n";
+    cout << "12. Them ban\n";
+    cout << "13. Hien thi ban\n";
+    cout << "14. Xem ton kho menu\n";
+    cout << "15. Thanh toan hoa don\n";
     cout << "0. Thoat\n";
     cout << "=========================================\n";
     cout << "Lua chon cua ban: ";
@@ -314,6 +369,11 @@ void printMainMenu() {
 // ==== HAM MAIN ==== //
 int main() {
     Restaurant res("Nha hang cua toi");
+
+    // Tạo sẵn 10 bàn (1..10), mỗi bàn 10 người
+    for (int i = 1; i <= 10; ++i) {
+        res.createTable(i, 10);
+    }
 
     int choice = -1;
     do {
@@ -336,8 +396,12 @@ int main() {
         case 7: menuAddCustomer(res);     pauseScreen(); break;
         case 8: menuShowCustomers(res);   pauseScreen(); break;
         case 9: menuCreateBill(res);      pauseScreen(); break;
-        case 10: menuShowAllBills(res);   pauseScreen(); break;
+        case 10:menuShowAllBills(res);    pauseScreen(); break;
         case 11: menuShowStatistics(res); pauseScreen(); break;
+        case 12: menuAddTable(res);       pauseScreen(); break;
+        case 13: menuShowTables(res);     pauseScreen(); break;
+        case 14: menuShowMenuStock(res);  pauseScreen(); break;
+        case 15: menuPayBill(res);        pauseScreen(); break;
         case 0: cout << "Dang thoat...\n"; break;
         default:
             cout << "Lua chon khong hop le.\n";

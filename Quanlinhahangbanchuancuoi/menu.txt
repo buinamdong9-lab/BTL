@@ -1,21 +1,21 @@
-F;1;Bo Wangguy Nuong;280000;10;mon chinh;300
-F;2;Bo Ribeye Nuong;350000;8;mon chinh;320
-F;3;Bo Sirloin Nuong;300000;10;mon chinh;310
-F;4;Bo Filet Mignon;400000;6;mon chinh;300
-F;5;Bo Tomahawk Nuong;450000;5;mon chinh;400
-F;6;Suon Bo Nuong;250000;12;mon chinh;350
-F;7;Beef Skewers Nuong;180000;15;mon chinh;250
-F;8;Bo Nuong Cay;220000;10;mon chinh;280
-F;9;Than Bo Nuong;370000;7;mon chinh;320
-F;10;Salad Bo Nuong;300000;8;mon chinh;260
-F;11;Caesar Salad;90000;15;khai vi;200
-F;12;Garlic Bread;45000;20;khai vi;120
-F;13;Chocolate Lava Cake;95000;10;trang mieng;140
-F;14;Vanilla Ice Cream;45000;20;trang mieng;100
-F;15;Mixed Green Salad;65000;18;khai vi;180
+F;1;Bo Wangguy Nuong;280;10;mon chinh;300
+F;2;Bo Ribeye Nuong;350;8;mon chinh;320
+F;3;Bo Sirloin Nuong;300;10;mon chinh;310
+F;4;Bo Filet Mignon;400;6;mon chinh;300
+F;5;Bo Tomahawk Nuong;450;5;mon chinh;400
+F;6;Suon Bo Nuong;250;12;mon chinh;350
+F;7;Beef Skewers Nuong;180;15;mon chinh;250
+F;8;Bo Nuong Cay;220;10;mon chinh;280
+F;9;Than Bo Nuong;370;7;mon chinh;320
+F;10;Salad Bo Nuong;300;8;mon chinh;260
+F;11;Caesar Salad;90;15;khai vi;200
+F;12;Garlic Bread;45;20;khai vi;120
+F;13;Chocolate Lava Cake;95;10;trang mieng;140
+F;14;Vanilla Ice Cream;45;20;trang mieng;100
+F;15;Mixed Green Salad;65;18;khai vi;180
 
-D;16;Bia Heineken;35000;50;bia;1
-D;17;Ruou Do Ly;90000;20;ruou;1
-D;18;Whiskey;95000;15;ruou manh;1
-D;19;Coca Cola;25000;60;nuoc ngot;0
-D;20;Nuoc Cam Tuoi;35000;35;nuoc ep;0
+D;16;Bia Heineken;35;50;bia;1
+D;17;Ruou Do Ly;90;20;ruou;1
+D;18;Whiskey;95;15;ruou manh;1
+D;19;Coca Cola;25;60;nuoc ngot;0
+D;20;Nuoc Cam Tuoi;35;35;nuoc ep;0

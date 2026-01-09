@@ -7,7 +7,8 @@ using namespace std;
 Bill::Bill()
     : billID(0), dateTime(""), customer(NULL),
     tableCount(0), itemCount(0),
-    taxRate(0.08), serviceRate(0.05)
+    taxRate(0.08), serviceRate(0.05),
+    paid(false)
 {
     for (int i = 0; i < MAX_TABLES_PER_BILL; ++i)
         tableIDs[i] = -1; // Khởi tạo mảng bàn với giá trị -1
@@ -17,7 +18,8 @@ Bill::Bill()
 Bill::Bill(int _billID, Customer* _customer)
     : billID(_billID), dateTime(""), customer(_customer),
     tableCount(0), itemCount(0),
-    taxRate(0.08), serviceRate(0.05)
+    taxRate(0.08), serviceRate(0.05),
+    paid(false)
 {
     for (int i = 0; i < MAX_TABLES_PER_BILL; ++i)
         tableIDs[i] = -1;
@@ -35,6 +37,9 @@ int Bill::getTableIDAt(int index) const {
 }
 double Bill::getTaxRate() const { return taxRate; }
 double Bill::getServiceRate() const { return serviceRate; }
+
+bool Bill::isPaid() const { return paid; }
+void Bill::setPaid(bool v) { paid = v; }
 
 // Setter ngày giờ
 void Bill::setDateTime(const string& dt) { dateTime = dt; }
@@ -132,35 +137,42 @@ double Bill::calcTotal() const {
 
 // Hiển thị hóa đơn ra màn hình (tiếng Việt)
 void Bill::display() const {
-    cout << "================= HOA DON =================\n";
-    cout << "Ma HĐ      : " << billID << endl;
-    cout << "Ngay/Gio   : " << dateTime << endl;
+    cout << *this; // tái sử dụng operator<<
+}
 
-    if (customer) {
-        cout << "Khach hang : " << customer->getName()
-            << " | SĐT: " << customer->getPhone() << endl;
+// Nạp chồng toán tử in Bill
+ostream& operator<<(ostream& os, const Bill& b) {
+    os << "================= HOA DON =================\n";
+    os << "Ma HĐ      : " << b.getID() << "\n";
+    os << "Ngay/Gio   : " << b.getDateTime() << "\n";
+
+    if (b.getCustomer()) {
+        os << "Khach hang : " << b.getCustomer()->getName()
+            << " | SĐT: " << b.getCustomer()->getPhone() << "\n";
     }
 
-    cout << "Ban        : ";
-    for (int i = 0; i < tableCount; ++i) {
-        cout << tableIDs[i];
-        if (i < tableCount - 1) cout << ", ";
+    os << "Ban        : ";
+    for (int i = 0; i < b.getTableCount(); ++i) {
+        os << b.getTableIDAt(i);
+        if (i < b.getTableCount() - 1) os << ", ";
     }
-    cout << "\n-------------------------------------------\n";
+    os << "\n-------------------------------------------\n";
 
-    cout << "Mon Hang:\n";
-    for (int i = 0; i < itemCount; ++i)
-        items[i].display(); // Gọi hàm hiển thị của từng OrderItem
+    os << "Mon Hang:\n";
+    for (int i = 0; i < b.getItemCount(); ++i)
+        b.getOrderItemAt(i).display(); // Truy cập thông qua phương thức public
 
-    cout << "-------------------------------------------\n";
-    double subtotal = calcSubtotal();
-    double tax = calcTax();
-    double service = calcServiceFee();
-    double total = calcTotal();
+    os << "-------------------------------------------\n";
+    double subtotal = b.calcSubtotal();
+    double tax = b.calcTax();
+    double service = b.calcServiceFee();
+    double total = b.calcTotal();
 
-    cout << "Tam Tinh  : " << subtotal << endl;
-    cout << "Thue      : " << tax << endl;
-    cout << "Phi DV    : " << service << endl;
-    cout << "TONG CONG : " << total << endl;
-    cout << "===========================================\n";
+    os << "Tam Tinh  : " << subtotal << "\n";
+    os << "Thue      : " << tax << "\n";
+    os << "Phi DV    : " << service << "\n";
+    os << "TONG CONG : " << total << "\n";
+    os << "Trang thai: " << (b.isPaid() ? "Da thanh toan" : "Chua thanh toan") << "\n";
+    os << "===========================================\n";
+    return os;
 }

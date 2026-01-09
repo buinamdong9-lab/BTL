@@ -9,20 +9,22 @@ using namespace std;
 
 // Khởi tạo mặc định
 Restaurant::Restaurant()
-    : name(""), menuCount(0), customerCount(0), billCount(0)
+    : name(""), menuCount(0), customerCount(0), billCount(0), tableCount(0)
 {
     for (int i = 0; i < MAX_MENU_ITEMS; ++i) menu[i] = NULL;
     for (int i = 0; i < MAX_CUSTOMERS; ++i) customers[i] = NULL;
     for (int i = 0; i < MAX_BILLS; ++i) bills[i] = NULL;
+    for (int i = 0; i < MAX_TABLES; ++i) tables[i] = NULL;
 }
 
 // Khởi tạo với ten nha hang
 Restaurant::Restaurant(const string& _name)
-    : name(_name), menuCount(0), customerCount(0), billCount(0)
+    : name(_name), menuCount(0), customerCount(0), billCount(0), tableCount(0)
 {
     for (int i = 0; i < MAX_MENU_ITEMS; ++i) menu[i] = NULL;
     for (int i = 0; i < MAX_CUSTOMERS; ++i) customers[i] = NULL;
     for (int i = 0; i < MAX_BILLS; ++i) bills[i] = NULL;
+    for (int i = 0; i < MAX_TABLES; ++i) tables[i] = NULL;
 }
 
 // HUY CONSTRUCTOR: xoa tat ca doi tuong dong bo nho
@@ -30,6 +32,52 @@ Restaurant::~Restaurant() {
     for (int i = 0; i < menuCount; ++i) delete menu[i];
     for (int i = 0; i < customerCount; ++i) delete customers[i];
     for (int i = 0; i < billCount; ++i) delete bills[i];
+    for (int i = 0; i < tableCount; ++i) delete tables[i];
+}
+
+// ===== TABLES =====
+
+bool Restaurant::createTable(int id, int capacity) {
+    if (tableCount >= MAX_TABLES) return false;
+    if (findTableByID(id) != NULL) return false; // duplicate id
+    tables[tableCount++] = new Table(id, capacity);
+    return true;
+}
+
+Table* Restaurant::findTableByID(int id) const {
+    for (int i = 0; i < tableCount; ++i)
+        if (tables[i] && tables[i]->getID() == id)
+            return tables[i];
+    return NULL;
+}
+
+void Restaurant::showTables() const {
+    cout << "===== DANH SACH BAN (" << tableCount << ") =====\n";
+    for (int i = 0; i < tableCount; ++i)
+        if (tables[i]) cout << *tables[i]; // sử dụng operator<<
+    cout << "===============================================\n";
+}
+
+// Gán bàn vào hóa đơn (nếu bàn tồn tại và đang rảnh)
+bool Restaurant::assignTableToBill(Bill* bill, int tableID) {
+    if (!bill) return false;
+    Table* t = findTableByID(tableID);
+    if (!t) return false;
+    if (t->getStatus() != EMPTY) return false;
+    if (!bill->addTable(tableID)) return false;
+    // Khi gán bàn: đánh dấu "Đã đặt" (WAITING)
+    t->markWaiting();
+    return true;
+}
+
+// Giải phóng (set empty) các bàn có trong hóa đơn (gọi khi thanh toán)
+void Restaurant::releaseTablesFromBill(Bill* bill) {
+    if (!bill) return;
+    for (int i = 0; i < bill->getTableCount(); ++i) {
+        int tid = bill->getTableIDAt(i);
+        Table* t = findTableByID(tid);
+        if (t) t->markEmpty();
+    }
 }
 
 // ===== MENU =====
@@ -71,7 +119,7 @@ bool Restaurant::loadMenuFromFile(const string& filename) {
         int stock = stoi(token);
 
         if (type == 'F') { // Mon an
-            string dishType;
+            string dishType;                    
             int servingSize;
             bool isVegetarian;
 
@@ -208,9 +256,23 @@ void Restaurant::showMenu() const {
     cout << string(80, '-') << endl;
 
     for (int i = 0; i < menuCount; ++i)
-
-        if (menu[i]) menu[i]->display(); // display da viet khong dau
+        if (menu[i]) menu[i]->display();
     cout << "===========================================\n";
+}
+
+// Hien thi tồn kho (ID, Ten, Ton)
+void Restaurant::showMenuStock() const {
+    cout << "===== TON KHO MENU =====\n";
+    cout << left << setw(6) << "ID" << setw(30) << "Ten" << setw(8) << "Ton" << endl;
+    cout << string(50, '-') << endl;
+    for (int i = 0; i < menuCount; ++i) {
+        if (!menu[i]) continue;
+        cout << left << setw(6) << menu[i]->getID()
+            << setw(30) << menu[i]->getName()
+            << setw(8) << menu[i]->getStock()
+            << endl;
+    }
+    cout << "=========================\n";
 }
 
 // ===== KHACH HANG =====
@@ -237,7 +299,7 @@ Customer* Restaurant::findCustomerByID(int id) {
 void Restaurant::showCustomers() const {
     cout << "===== DANH SACH KHACH HANG (" << customerCount << ") =====\n";
     for (int i = 0; i < customerCount; ++i)
-        if (customers[i]) customers[i]->display(); // display da viet khong dau
+        if (customers[i]) customers[i]->display();
     cout << "===============================================\n";
 }
 
@@ -250,28 +312,84 @@ Bill* Restaurant::createBill(int billID, Customer* customer) {
     return bills[billCount++];
 }
 
-// Luu ket qua hoa don vao khach hang
+// finalizeBill: cập nhật lịch sử KH (giảm tồn kho) - internal
 void Restaurant::finalizeBill(Bill* bill) {
     if (!bill) return;
+    if (bill->isPaid()) return;
+    // Giảm tồn kho: duyệt các order item trong hóa đơn và giảm stock
+    for (int i = 0; i < bill->getItemCount(); ++i) {
+        const OrderItem& oi = bill->getOrderItemAt(i);
+        MenuItem* mi = oi.getItem();
+        if (mi) {
+            mi->reduceStock(oi.getQuantity());
+        }
+    }
+
     Customer* c = bill->getCustomer();
     if (c) {
         double total = bill->calcTotal();
         c->updateRevenue(total);
         c->addBill(bill);
     }
+    // giải phóng bàn sau khi hoàn tất hóa đơn
+    releaseTablesFromBill(bill);
+    bill->setPaid(true);
 }
 
-// Hien thi tat ca hoa don
+// Thanh toán hóa đơn theo ID: gọi finalize + ghi file thống kê
+bool Restaurant::payBill(int billID) {
+    Bill* b = NULL;
+    for (int i = 0; i < billCount; ++i) {
+        if (bills[i] && bills[i]->getID() == billID) { b = bills[i]; break; }
+    }
+    if (!b) return false;
+    if (b->isPaid()) return false; // đã thanh toán
+
+    // finalize (update customer history + release tables + giảm tồn kho)
+    finalizeBill(b);
+
+    // ghi file thống kê (append)
+    ofstream fout("statistics.txt", ios::app);
+    if (!fout.is_open()) {
+        cout << "Khong the mo file statistics.txt de luu thong ke.\n";
+        return false;
+    }
+
+    // Ghi dưới dạng CSV: billID;dateTime;customerID;customerName;total
+    fout << b->getID() << ";"
+         << b->getDateTime() << ";";
+
+    Customer* c = b->getCustomer();
+    if (c) {
+        fout << c->getID() << ";" << c->getName() << ";";
+    }
+    else {
+        fout << "0;Unknown;";
+    }
+
+    fout << b->calcTotal() << "\n";
+    fout.close();
+
+    return true;
+}
+
+// Hien thi tat ca hoa don CHƯA THANH TOÁN (theo yêu cầu)
 void Restaurant::showAllBills() const {
-    cout << "===== TAT CA HOA DON (" << billCount << ") =====\n";
-    for (int i = 0; i < billCount; ++i)
-        if (bills[i]) bills[i]->display(); // display da viet khong dau
-    cout << "===============================================\n";
+    cout << "===== HOA DON CHUA THANH TOAN =====\n";
+    bool any = false;
+    for (int i = 0; i < billCount; ++i) {
+        if (bills[i] && !bills[i]->isPaid()) {
+            cout << *bills[i]; // sử dụng operator<<
+            any = true;
+        }
+    }
+    if (!any) cout << "Khong co hoa don chua thanh toan.\n";
+    cout << "===================================\n";
 }
 
 // ===== THONG KE =====
 
-// Tong doanh thu
+// Tong doanh thu (tổng tất cả các bill — bao gồm đã thanh toán)
 double Restaurant::getTotalRevenue() const {
     double sum = 0.0;
     for (int i = 0; i < billCount; ++i)

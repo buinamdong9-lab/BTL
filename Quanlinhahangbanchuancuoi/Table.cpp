@@ -35,7 +35,7 @@ void Table::display() const {
     switch (status) {
     case EMPTY:    cout << "Trong"; break;
     case WAITING:  cout << "Cho phuc vu"; break;
-    case OCCUPIED: cout << "Đang su dung"; break;
+    case OCCUPIED: cout << "Dang su dung"; break;
     default:       cout << "Khong xac dinh"; break;
     }
     cout << endl;

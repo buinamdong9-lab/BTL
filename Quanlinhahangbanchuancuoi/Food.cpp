@@ -9,7 +9,7 @@ Food::Food()
     dishType(""),
     servingSize(0)
 {
-    category = "Mon an"; // Chuyển category sang tiếng Việt
+    category = "Mon an";
 }
 
 // Constructor đầy đủ với các thuộc tính

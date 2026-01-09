@@ -2,12 +2,18 @@
 #define BILL_H
 
 #include <string>
+#include <ostream>
 #include "config.h"
 #include "Order.h"
 using namespace std;
 
 class Customer;
 
+/*
+    Bill không phải lớp trừu tượng. 
+    Thêm trường 'paid' để quản lý trạng thái thanh toán.
+    Thêm nạp chồng toán tử operator<< để in hóa đơn dễ dàng.
+*/
 class Bill {
 private:
 	int billID;
@@ -22,6 +28,8 @@ private:
 
 	double taxRate;// Thuế suất áp dụng cho hóa đơn
 	double serviceRate;// Phí dịch vụ áp dụng cho hóa đơn
+
+    bool paid; // trạng thái đã thanh toán
 
 public:
 	Bill();
@@ -53,7 +61,15 @@ public:
 	double calcServiceFee() const;// Tính phí dịch vụ
 	double calcTotal() const;// Tính tổng tiền thanh toán
 
+    bool isPaid() const;
+    void setPaid(bool v);
+
 	void display() const;// Hiển thị thông tin hóa đơn
+    // Thêm phương thức truy cập OrderItem cho phép operator<< sử dụng
+    const OrderItem& getOrderItemAt(int index) const { return items[index]; }
 };
+
+// Nạp chồng toán tử in Bill
+ostream& operator<<(ostream& os, const Bill& b);
 
 #endif // BILL_H

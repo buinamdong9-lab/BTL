@@ -32,6 +32,10 @@ public:
     void addBill(Bill* bill);
     void updateRevenue(double amount);
 
+    // Optional helpers
+    Bill* getBillAt(int index) const;
+    void displayHistory() const;
+
     void display() const;
 };
 

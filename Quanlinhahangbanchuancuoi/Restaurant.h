@@ -1,4 +1,4 @@
-﻿#ifndef RESTAURANT_H
+﻿    #ifndef RESTAURANT_H
 #define RESTAURANT_H
 
 #include <string>
@@ -8,6 +8,7 @@
 #include "Drink.h"
 #include "Customer.h"
 #include "Bill.h"
+#include "Table.h"
 using namespace std;
 
 class Restaurant {
@@ -22,6 +23,9 @@ private:
 
     Bill* bills[MAX_BILLS];
     int billCount;
+
+    Table* tables[MAX_TABLES];
+    int tableCount;
 
 public:
     Restaurant();
@@ -41,6 +45,7 @@ public:
         int newStock);
 
     void showMenu() const;
+    void showMenuStock() const;
 
     // CUSTOMER
     Customer* addCustomer(int id,
@@ -51,9 +56,18 @@ public:
 
     // BILL
     Bill* createBill(int billID, Customer* customer); // lưu luôn vào mảng
-    void finalizeBill(Bill* bill);                    // cập nhật doanh thu + history
+    void finalizeBill(Bill* bill);                    // internal: cập nhật lịch sử (không tự động gọi trên tạo)
+    bool payBill(int billID);                         // thanh toán: finalize + ghi file thống kê
 
+    // Hiển thị: chỉ hiện các bill chưa thanh toán theo yêu cầu
     void showAllBills() const;
+
+    // TABLES
+    bool createTable(int id, int capacity);
+    Table* findTableByID(int id) const;
+    void showTables() const;
+    bool assignTableToBill(Bill* bill, int tableID);
+    void releaseTablesFromBill(Bill* bill);
 
     // STATISTICS
     double getTotalRevenue() const;
