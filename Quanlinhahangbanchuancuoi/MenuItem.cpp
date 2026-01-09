@@ -1,5 +1,6 @@
 ﻿#include "MenuItem.h"
 #include <iostream>
+#include <iomanip>
 using namespace std;
 
 MenuItem::MenuItem()
@@ -51,4 +52,17 @@ void MenuItem::reduceStock(int quantity) {
 void MenuItem::restock(int quantity) {
     if (quantity <= 0) return;
     stock += quantity;
+}
+
+// Triển khai operator<< cho MenuItem: in các trường cơ bản.
+// Lưu ý: hàm này không gọi display() vì display() xuất ra cout trực tiếp.
+// operator<< in định dạng ngắn gọn vào ostream được cung cấp.
+std::ostream& operator<<(std::ostream& os, const MenuItem& m) {
+    os << left
+       << setw(6) << m.id
+       << setw(30) << m.name
+       << setw(10) << m.price
+       << setw(8) << m.stock
+       << setw(12) << m.category;
+    return os;
 }

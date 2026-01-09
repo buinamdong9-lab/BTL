@@ -406,3 +406,12 @@ Customer* Restaurant::getTopCustomerByRevenue() {
             best = customers[i];
     return best;
 }
+
+// Tim hoa don theo ID
+Bill* Restaurant::findBillByID(int billID) const {
+    for (int i = 0; i < billCount; ++i) {
+        if (bills[i] && bills[i]->getID() == billID)
+            return bills[i];
+    }
+    return NULL;
+}

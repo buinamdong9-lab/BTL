@@ -6,12 +6,10 @@
 using namespace std;
 
 /*
-    MenuItem là lớp trừu tượng (abstract) — có phương thức ảo thuần túy:
-      virtual void display() const = 0;
-      virtual MenuItem* clone() const = 0;
-    => Đây là KẾ THỪA TRỪU TƯỢNG + ĐA HÌNH (polymorphism):
-       - Lớp con (Food, Drink) kế thừa MenuItem và triển khai display()/clone().
-       - Ở runtime ta gọi menu[i]->display() và sẽ thực thi hàm display() tương ứng theo kiểu thực tế (Food/Drink).
+    MenuItem là lớp trừu tượng (abstract):
+    - Có hàm ảo thuần túy `display()` và `clone()` => lớp con (Food, Drink) phải triển khai.
+    - Đây là KẾ THỪA TRỪU TƯỢNG và ĐA HÌNH: khi lưu trữ con trỏ loại MenuItem*,
+      gọi menu[i]->display() sẽ thực thi hàm tương ứng của lớp con (polymorphism).
 */
 class MenuItem {
 protected:
@@ -48,5 +46,12 @@ public:
     // Hàm ảo thuần túy => lớp này là abstract
     virtual void display() const = 0;
     virtual MenuItem* clone() const = 0;
+
+    // Nạp chồng toán tử: in thông tin ngắn gọn của MenuItem
+    // Đây là ví dụ OPERATOR OVERLOADING -> định nghĩa ngoài lớp (free function)
+    friend std::ostream& operator<<(std::ostream& os, const MenuItem& m);
+
+    // Nạp chồng toán tử so sánh (theo id)
+    bool operator==(const MenuItem& other) const { return id == other.id; }
 };
 

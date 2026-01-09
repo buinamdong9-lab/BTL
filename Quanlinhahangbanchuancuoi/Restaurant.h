@@ -1,4 +1,4 @@
-﻿    #ifndef RESTAURANT_H
+﻿#ifndef RESTAURANT_H
 #define RESTAURANT_H
 
 #include <string>
@@ -58,6 +58,9 @@ public:
     Bill* createBill(int billID, Customer* customer); // lưu luôn vào mảng
     void finalizeBill(Bill* bill);                    // internal: cập nhật lịch sử (không tự động gọi trên tạo)
     bool payBill(int billID);                         // thanh toán: finalize + ghi file thống kê
+
+    // Tìm bill theo ID (dùng cho nghiệp vụ gọi món cho bill chưa thanh toán)
+    Bill* findBillByID(int billID) const;
 
     // Hiển thị: chỉ hiện các bill chưa thanh toán theo yêu cầu
     void showAllBills() const;
